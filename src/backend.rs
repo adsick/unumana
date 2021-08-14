@@ -16,6 +16,8 @@ impl Default for Backend {
 impl Backend {
     pub fn execute(&mut self, c: &Command) -> () {
         match c {
+            Command::MoveCursorRight => self.move_cursor_right(),
+            Command::MoveCursorLeft => self.move_cursor_left(),
             Command::PutCharAfterCursor(ch) => {
                 self.put_char_after_cursor(*ch);
             }
@@ -60,7 +62,22 @@ impl Backend {
     fn move_cursor_left(&mut self) {
         let ln = self.cursor.line;
         if let Some((line, cur_ind)) = self.lines.get_mut(ln) {
+            println!("cur_ind is {}", cur_ind);
             prev(line, cur_ind);
+            println!("new_ind is {}", cur_ind);
+        }
+    }
+
+    //it is probably too early for using unsafe, but...
+    //safety: we assume that cur_ind is valid.
+    fn move_cursor_right(&mut self) {
+        let ln = self.cursor.line;
+        if let Some((line, cur_ind)) = self.lines.get_mut(ln) {
+            println!("cur_ind is {}", cur_ind);
+            if let Some(ch) = line.get(*cur_ind..).expect("you are doomed").chars().next() {
+                *cur_ind += ch.len_utf8();
+            }
+            println!("new_ind is {}", cur_ind);
         }
     }
 
@@ -80,8 +97,7 @@ fn prev(str: &str, cur_ind: &mut usize) {
     if *cur_ind == 0 {
         return;
     }
-
-    if let Some((ind, _)) = str.char_indices().rev().next() {
+    if let Some((ind, _)) = str.get(..*cur_ind).unwrap().char_indices().rev().next() {
         *cur_ind = ind;
     }
 }

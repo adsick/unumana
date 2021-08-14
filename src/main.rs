@@ -86,11 +86,19 @@ fn input(
         } = ki;
         if state == &bevy::input::ElementState::Pressed {
             controller.press(sc, time.seconds_since_startup());
-            if sc == &58 {
+
+            if controller.is_pressed(57) {
+                if sc == &36 {
+                    println!("moving cursor left...");
+                    evwc.send(Command::MoveCursorLeft);
+                } else if sc == &37 {
+                    println!("moving cursor right...");
+                    evwc.send(Command::MoveCursorRight);
+                }
+            } else if sc == &58 {
                 //Caps
                 keymap.switch();
-            }
-            if sc == &14 {
+            } else if sc == &14 {
                 //Backspace
                 evwc.send(Command::RemoveUnderCursor)
             } else {
@@ -101,6 +109,9 @@ fn input(
                 evwc.send(Command::PutCharAfterCursor(ch));
             }
         } else {
+            if sc == &57 {
+                // evwc.send(Command::PutCharAfterCursor(' '));
+            }
             controller.release(sc, time.seconds_since_startup());
         }
     }
@@ -111,7 +122,7 @@ fn input(
 }
 
 fn backend_update(
-    time: Res<Time>,
+    // time: Res<Time>,
     mut backend: Query<&mut Backend>,
     mut evrc: EventReader<Command>,
 ) {
@@ -127,7 +138,7 @@ fn backend_update(
 }
 
 fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend>) {
-    let mut backend = backend.single().unwrap();
+    let backend = backend.single().unwrap();
     frontend
         .single_mut()
         .unwrap()
