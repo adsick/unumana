@@ -51,6 +51,6 @@ enum Mode {
 
 impl Default for Mode {
     fn default() -> Self {
-        TajMode::Normal
+        Mode::Normal
     }
 }
