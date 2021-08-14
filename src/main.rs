@@ -7,7 +7,6 @@ fn main() {
         .add_startup_system(setup)
         .add_system(animate_translation)
         .add_system(input)
-        //.add_system(update_commands)
         .add_system(backend_update)
         .add_event::<Command>()
         .run();
@@ -110,23 +109,6 @@ fn input(
     // println!("input_update end: {}ns", el);
 }
 
-// fn update_commands(time: Res<Time>, mut query: Query<(&mut Controller, &mut Backend)>) {
-//     println!(
-//         "update_commands begin",
-//     );
-//     let instant = std::time::Instant::now();
-//     let (mut controller, mut backend) = query.single_mut().unwrap();
-
-//     // for ref mut input in controller.input.drain(..) {
-//     //     if input.scan_code == 30 {
-//     //         println!("scancode was 30");
-//     //         backend.push_command(Command::PutCharAfterCursor('a'));
-//     //     }
-//     // }
-//     let el = instant.elapsed().as_nanos();
-//     println!("commands_update end: {}ns", el);
-// }
-
 fn backend_update(
     time: Res<Time>,
     mut backend: Query<&mut Backend>,
@@ -140,8 +122,6 @@ fn backend_update(
     for c in evrc.iter() {
         backend.execute(c);
     }
-
-    // backend.work();
 
     // std::thread::sleep(std::time::Duration::from_millis(100));
 
