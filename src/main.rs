@@ -1,5 +1,5 @@
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
-use eted::{Backend, Command, Controller, Editor, Keymap};
+use bokken::{Backend, Command, Controller, Editor, Keymap};
 
 fn main() {
     App::new()

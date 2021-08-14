@@ -7,7 +7,7 @@ use bevy::utils::HashMap;
 pub struct Controller {
     pressed: HashMap<u32, f64>,         //sc and the time when it was pressed
     released: HashMap<u32, (f64, f64)>, //sc, time when it was released and time when it was pressed before this release
-    mode: TajMode,
+    mode: Mode,
     //cursor: Cursor, //isn't it part of the state?
 }
 
@@ -42,14 +42,14 @@ impl Controller {
     //pub fn get_input(&mut self)->&mut Vec
 }
 
-enum TajMode {
+enum Mode {
     Normal,
     Insert,
     Visual,
     Halted,
 }
 
-impl Default for TajMode {
+impl Default for Mode {
     fn default() -> Self {
         TajMode::Normal
     }
