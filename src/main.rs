@@ -8,6 +8,7 @@ fn main() {
         .add_system(animate_translation)
         .add_system(input)
         .add_system(backend_update)
+        .add_system(frontend_update)
         .add_event::<Command>()
         .run();
 }
@@ -103,16 +104,15 @@ fn input(
             controller.release(sc, time.seconds_since_startup());
         }
     }
-   // controller.print_dbg();
+    // controller.print_dbg();
 
-    let el = instant.elapsed().as_nanos();
+    // let el = instant.elapsed().as_nanos();
     // println!("input_update end: {}ns", el);
 }
 
 fn backend_update(
     time: Res<Time>,
     mut backend: Query<&mut Backend>,
-    mut frontend: Query<&mut Text>,
     mut evrc: EventReader<Command>,
 ) {
     // println!("backend_update begin ");
@@ -124,7 +124,10 @@ fn backend_update(
     }
 
     // std::thread::sleep(std::time::Duration::from_millis(100));
+}
 
+fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend>) {
+    let mut backend = backend.single().unwrap();
     frontend
         .single_mut()
         .unwrap()
@@ -137,10 +140,4 @@ fn backend_update(
         .map(|(str, _)| str.clone())
         .collect::<Vec<String>>()
         .concat();
-    // let el = instant.elapsed().as_nanos();
-    // println!(
-    //     "backend_update end: {}ns\nframe ended, time: {}",
-    //     el,
-    //     time.seconds_since_startup()
-    // );
 }

@@ -26,7 +26,7 @@ impl Backend {
                 }
             }
             Command::Repeat { times, command } => {
-                for i in 0..*times {
+                for _ in 0..*times {
                     self.execute(&command)
                 }
             }
@@ -68,25 +68,20 @@ impl Backend {
         todo!() //use something like self.lines.iter_mut().take(self.cursor.line).0.iter().take(self.cursor.column)...
     }
 
+    //I want to use iterator here, but it pisses me off omg...
     pub fn lines(&self) -> &[(String, usize)] {
         &self.lines
     }
 }
 
-//mutates cur_ind to be previous char
-//it is better to use external crates for this
+//mutates cur_ind to sit on previous char
+//it is better to use external crates for this I guess
 fn prev(str: &str, cur_ind: &mut usize) {
     if *cur_ind == 0 {
         return;
     }
 
-    let char_indices = str.char_indices();
-    let mut res_ind = 0;
-    for (i, ch) in char_indices {
-        if i == *cur_ind {
-            break;
-        }
-        res_ind = i;
+    if let Some((ind, _)) = str.char_indices().rev().next() {
+        *cur_ind = ind;
     }
-    *cur_ind = res_ind;
 }
