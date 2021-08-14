@@ -1,11 +1,3 @@
-use phf::phf_ordered_set;
-
- static PHF_KEYMAP: phf::OrderedSet<&'static str> = phf_ordered_set! {
-     "dvorak",
-     "russian",
- };
-
-
 #[derive(Debug, PartialEq)]
 pub enum Keymap {
     Dvorak,
@@ -19,14 +11,11 @@ impl Keymap {
             Keymap::Russian => Keymap::russian(sc),
         }
     }
-
     pub fn switch(&mut self) {
-        if *self == Keymap::Dvorak {
-            *self = Keymap::Russian
-        } else {
-            *self = Keymap::Dvorak
-        }
-        
+        *self = match *self {
+            Keymap::Dvorak => Keymap::Russian,
+            Keymap::Russian => Keymap::Dvorak,
+        };
     }
     pub fn dvorak(sc: u32) -> char {
         match sc {

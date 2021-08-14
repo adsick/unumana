@@ -1,5 +1,5 @@
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
-use eted::{Backend, Command, Controller, Keymap, Taj};
+use eted::{Backend, Command, Controller, Editor, Keymap};
 
 fn main() {
     App::new()
@@ -37,7 +37,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let mut text_sample = String::new();
 
-    commands.spawn_bundle(Taj::default()); //overflow
+    commands.spawn_bundle(Editor::default()); //overflow
 
     commands
         .spawn_bundle(Text2dBundle {
@@ -69,14 +69,14 @@ fn animate_translation(
 fn input(
     time: Res<Time>,
     mut input: EventReader<KeyboardInput>,
-    mut taj: Query<&mut Controller>,
+    mut controller: Query<&mut Controller>,
     mut evwc: EventWriter<Command>,
     mut keymap: ResMut<Keymap>,
 ) {
     // println!("input_update begin",);
     let instant = std::time::Instant::now();
 
-    let mut controller = taj.single_mut().unwrap();
+    let mut controller = controller.single_mut().unwrap();
 
     for ki in input.iter() {
         let KeyboardInput {
@@ -92,7 +92,7 @@ fn input(
             }
             if sc == &14 {
                 //Backspace
-                evwc.send(Command::ClearUnderCursor)
+                evwc.send(Command::RemoveUnderCursor)
             } else {
                 let mut ch = keymap.convert(*sc);
                 controller
@@ -104,7 +104,7 @@ fn input(
             controller.release(sc, time.seconds_since_startup());
         }
     }
-    controller.print_dbg();
+   // controller.print_dbg();
 
     let el = instant.elapsed().as_nanos();
     // println!("input_update end: {}ns", el);
@@ -134,7 +134,7 @@ fn backend_update(
     mut evrc: EventReader<Command>,
 ) {
     // println!("backend_update begin ");
-    let instant = std::time::Instant::now();
+    // let instant = std::time::Instant::now();
     let mut backend = backend.single_mut().unwrap();
 
     for c in evrc.iter() {
@@ -151,8 +151,13 @@ fn backend_update(
         .sections
         .first_mut()
         .unwrap()
-        .value = backend.lines().concat();
-    let el = instant.elapsed().as_nanos();
+        .value = backend
+        .lines()
+        .iter()
+        .map(|(str, _)| str.clone())
+        .collect::<Vec<String>>()
+        .concat();
+    // let el = instant.elapsed().as_nanos();
     // println!(
     //     "backend_update end: {}ns\nframe ended, time: {}",
     //     el,

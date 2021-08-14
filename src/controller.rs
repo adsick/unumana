@@ -21,6 +21,7 @@ impl Controller {
     pub fn release(&mut self, sc: &u32, time: f64) {
         if let Some(t) = self.pressed.remove(sc) {
             //in some rare cases a key can be actually 'released' but not 'pressed' before it
+            //so this is kinda broken
             self.released.insert(*sc, (time, t));
         }
     }
