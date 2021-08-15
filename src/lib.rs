@@ -22,8 +22,8 @@ impl Editor {
     }
 }
 
-#[derive(Default)]
-pub struct Cursor {
-    line: usize,
-    column: usize,
-}
+// #[derive(Default)]
+// pub struct Cursor {
+//     line: usize,
+//     column: usize,
+// }

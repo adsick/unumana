@@ -74,26 +74,41 @@ fn input(
     mut keymap: ResMut<Keymap>,
 ) {
     // println!("input_update begin",);
-    let instant = std::time::Instant::now();
+    //let instant = std::time::Instant::now();
 
     let mut controller = controller.single_mut().unwrap();
 
     for ki in input.iter() {
         let KeyboardInput {
             scan_code: sc,
-            key_code: kc,
+            key_code: _,
             state,
         } = ki;
         if state == &bevy::input::ElementState::Pressed {
             controller.press(sc, time.seconds_since_startup());
 
-            if controller.is_pressed(57) {
+            if let Some(duration) =
+                controller.get_pressed_duration(57, time.seconds_since_startup())
+            {
                 if sc == &36 {
-                    println!("moving cursor left...");
-                    evwc.send(Command::MoveCursorLeft);
+                    if duration < 0.5{
+                        println!("moving cursor left...");
+                        evwc.send(Command::MoveCursorLeft);
+                    } else {
+                        println!("moving cursor backward...");
+                        evwc.send(Command::MoveCursorBackward);
+                    }
                 } else if sc == &37 {
-                    println!("moving cursor right...");
-                    evwc.send(Command::MoveCursorRight);
+                    if duration < 0.5 {
+                        println!("moving cursor right...");
+                        evwc.send(Command::MoveCursorRight);
+                    } else {
+                        println!("moving cursor forward...");
+                        evwc.send(Command::MoveCursorForward);
+                    }
+                } else if sc == &28 {
+                    println!("adding a line before...");
+                    evwc.send(Command::NewLineBefore);
                 }
             } else if sc == &58 {
                 //Caps
@@ -101,6 +116,9 @@ fn input(
             } else if sc == &14 {
                 //Backspace
                 evwc.send(Command::RemoveUnderCursor)
+            } else if sc == &28 {
+                println!("adding a line after...");
+                evwc.send(Command::NewLineAfter)
             } else {
                 let mut ch = keymap.convert(*sc);
                 controller
@@ -145,10 +163,10 @@ fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend>) {
         .sections
         .first_mut()
         .unwrap()
-        .value = backend
-        .lines()
-        .iter()
-        .map(|(str, _)| str.clone())
-        .collect::<Vec<String>>()
-        .concat();
+        .value = backend.render();
+    // .lines()
+    // .iter()
+    // .map(|(str, _)| str.clone())
+    // .collect::<Vec<String>>()
+    // .concat();
 }

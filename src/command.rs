@@ -2,9 +2,11 @@
 pub enum Command {
     MoveCursorRight, //parametrize with count?
     MoveCursorLeft,
-    //MoveCursorForward,
-    //MoveCursorBackward,
+    MoveCursorForward,
+    MoveCursorBackward,
     PutCharAfterCursor(char), //insert a single char,
+    NewLineAfter,
+    NewLineBefore,
     //PutStringAfterCursor(&'a str),
     RemoveUnderCursor,
 

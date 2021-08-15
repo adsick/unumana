@@ -1,15 +1,15 @@
-use crate::{Command, Cursor};
+use crate::Command;
 
 pub struct Backend {
-    cursor: Cursor,
-    lines: Vec<(String, usize)>, //last valid utf-8 byte indx
+    line: usize,                //current line
+    text: Vec<(String, usize)>, //last valid utf-8 byte indx
 }
 
 impl Default for Backend {
     fn default() -> Self {
         Backend {
-            cursor: Cursor::default(),
-            lines: vec![(String::new(), 0)],
+            line: 0,
+            text: vec![(String::new(), 0)],
         }
     }
 }
@@ -18,9 +18,16 @@ impl Backend {
         match c {
             Command::MoveCursorRight => self.move_cursor_right(),
             Command::MoveCursorLeft => self.move_cursor_left(),
+            Command::MoveCursorForward => self.move_cursor_forward(),
+            Command::MoveCursorBackward => self.move_cursor_backward(),
+
             Command::PutCharAfterCursor(ch) => {
                 self.put_char_after_cursor(*ch);
             }
+
+            Command::NewLineAfter => self.new_line_after(),
+            Command::NewLineBefore => self.new_line_before(),
+
             Command::RemoveUnderCursor => self.remove_char_under_cursor(),
             Command::Sequence(v) => {
                 for c in v {
@@ -33,24 +40,31 @@ impl Backend {
                 }
             }
         }
+        self.print_position()
+
     }
 
     //imma not sure if this should be public
     fn put_char_after_cursor(&mut self, ch: char) {
-        if let Some((line, ind)) = self.lines.get_mut(self.cursor.line) {
-            line.insert(*ind, ch);
-            *ind += ch.len_utf8();
-            //println!("ind: {}", ind);
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
+            line.insert(*cur_ind, ch);
+            *cur_ind += ch.len_utf8();
         } else {
             panic!("cursor is out of lines");
         }
+    }
 
-        //self.cursor.column += ch.len_utf8();
+    fn new_line_after(&mut self) {
+        self.text.insert(self.line + 1, (String::new(), 0));
+        self.line += 1;
+    }
+
+    fn new_line_before(&mut self) {
+        self.text.insert(self.line, (String::new(), 0));
     }
 
     fn remove_char_under_cursor(&mut self) {
-        let ln = self.cursor.line;
-        if let Some((line, cur_ind)) = self.lines.get_mut(ln) {
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
             if line.len() == 0 {
                 return;
             }
@@ -59,27 +73,46 @@ impl Backend {
         }
     }
 
-    fn move_cursor_left(&mut self) {
-        let ln = self.cursor.line;
-        if let Some((line, cur_ind)) = self.lines.get_mut(ln) {
-            println!("cur_ind is {}", cur_ind);
-            prev(line, cur_ind);
-            println!("new_ind is {}", cur_ind);
-        }
-    }
-
-    //it is probably too early for using unsafe, but...
     //safety: we assume that cur_ind is valid.
     fn move_cursor_right(&mut self) {
-        let ln = self.cursor.line;
-        if let Some((line, cur_ind)) = self.lines.get_mut(ln) {
-            println!("cur_ind is {}", cur_ind);
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
             if let Some(ch) = line.get(*cur_ind..).expect("you are doomed").chars().next() {
                 *cur_ind += ch.len_utf8();
             }
-            println!("new_ind is {}", cur_ind);
+            let cur_ind = *cur_ind;
         }
     }
+
+    fn move_cursor_left(&mut self) {
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
+            prev(line, cur_ind);
+        }
+    }
+    //refactor to use existing methods. just check if on the end on the string.
+    fn move_cursor_forward(&mut self) {
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
+            if line.len() == *cur_ind{
+                if self.text.len() > self.line + 1 {
+                    self.line += 1;
+                }
+            } else {
+                self.move_cursor_right()
+            }
+        }
+    }
+
+    fn move_cursor_backward(&mut self) {
+        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
+            if* cur_ind == 0{
+                if self.line > 0 {
+                    self.line -= 1;
+                }
+            } else {
+                self.move_cursor_left()
+            }
+        }
+    }
+
 
     fn move_cursor_to(&mut self, pos: (usize, usize)) -> (usize, usize) {
         todo!() //use something like self.lines.iter_mut().take(self.cursor.line).0.iter().take(self.cursor.column)...
@@ -87,7 +120,23 @@ impl Backend {
 
     //I want to use iterator here, but it pisses me off omg...
     pub fn lines(&self) -> &[(String, usize)] {
-        &self.lines
+        &self.text
+    }
+
+    pub fn line(&self) -> usize {
+        self.line
+    }
+
+    pub fn print_position(&self){
+        println!("({}, {})", self.line, self.text.get(self.line).unwrap().1)
+    }
+
+    pub fn render(&self) -> String {
+        self.text
+            .iter()
+            .map(|item| item.0.to_owned())
+            .collect::<Vec<String>>()
+            .join("\n")
     }
 }
 
