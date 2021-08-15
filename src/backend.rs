@@ -16,10 +16,12 @@ impl Default for Backend {
 impl Backend {
     pub fn execute(&mut self, c: &Command) -> () {
         match c {
-            Command::MoveCursorRight => self.move_cursor_right(),
-            Command::MoveCursorLeft => self.move_cursor_left(),
+            Command::MoveCursorRightward => self.move_cursor_rightward(),
+            Command::MoveCursorLeftward => self.move_cursor_leftward(),
             Command::MoveCursorForward => self.move_cursor_forward(),
             Command::MoveCursorBackward => self.move_cursor_backward(),
+            Command::MoveCursorUpward => self.move_cursor_upward(),
+            Command::MoveCursorDownward => self.move_cursor_downward(),
 
             Command::PutCharAfterCursor(ch) => {
                 self.put_char_after_cursor(*ch);
@@ -74,16 +76,16 @@ impl Backend {
     }
 
     //safety: we assume that cur_ind is valid.
-    fn move_cursor_right(&mut self) {
+    fn move_cursor_rightward(&mut self) {
         if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
-            if let Some(ch) = line.get(*cur_ind..).expect("you are doomed").chars().next() {
+            if let Some(ch) = line.get(*cur_ind..).unwrap().chars().next() {
                 *cur_ind += ch.len_utf8();
             }
             let cur_ind = *cur_ind;
         }
     }
 
-    fn move_cursor_left(&mut self) {
+    fn move_cursor_leftward(&mut self) {
         if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
             prev(line, cur_ind);
         }
@@ -96,7 +98,7 @@ impl Backend {
                     self.line += 1;
                 }
             } else {
-                self.move_cursor_right()
+                self.move_cursor_rightward()
             }
         }
     }
@@ -108,11 +110,22 @@ impl Backend {
                     self.line -= 1;
                 }
             } else {
-                self.move_cursor_left()
+                self.move_cursor_leftward()
             }
         }
     }
 
+    fn move_cursor_upward(&mut self){
+        if self.line > 0{
+            self.line-=1;
+        }
+    }
+
+    fn move_cursor_downward(&mut self){
+        if self.line + 1 < self.text.len(){
+            self.line+=1;
+        }
+    }
 
     fn move_cursor_to(&mut self, pos: (usize, usize)) -> (usize, usize) {
         todo!() //use something like self.lines.iter_mut().take(self.cursor.line).0.iter().take(self.cursor.column)...

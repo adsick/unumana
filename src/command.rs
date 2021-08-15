@@ -1,9 +1,14 @@
 #[derive(Clone)]
 pub enum Command {
-    MoveCursorRight, //parametrize with count?
-    MoveCursorLeft,
+    MoveCursorRightward, //parametrize with count?
+    MoveCursorLeftward,
     MoveCursorForward,
     MoveCursorBackward,
+    MoveCursorUpward,
+    MoveCursorDownward,
+
+
+
     PutCharAfterCursor(char), //insert a single char,
     NewLineAfter,
     NewLineBefore,

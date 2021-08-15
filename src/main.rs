@@ -77,6 +77,7 @@ fn input(
     //let instant = std::time::Instant::now();
 
     let mut controller = controller.single_mut().unwrap();
+    let time = time.seconds_since_startup();
 
     for ki in input.iter() {
         let KeyboardInput {
@@ -85,27 +86,40 @@ fn input(
             state,
         } = ki;
         if state == &bevy::input::ElementState::Pressed {
-            controller.press(sc, time.seconds_since_startup());
+            let prev = controller.press(sc, time);
 
             if let Some(duration) =
-                controller.get_pressed_duration(57, time.seconds_since_startup())
+                controller.get_pressed_duration(57, time)
             {
                 if sc == &36 {
-                    if duration < 0.5{
-                        println!("moving cursor left...");
-                        evwc.send(Command::MoveCursorLeft);
+                    if controller.is_pressed(39){ //S serves as mod key here
+                        evwc.send(Command::MoveCursorLeftward);
                     } else {
-                        println!("moving cursor backward...");
-                        evwc.send(Command::MoveCursorBackward);
+                        evwc.send(Command::MoveCursorDownward);
                     }
+
+                    // if duration < 0.5{
+                    //     println!("moving cursor left...");
+                    //     evwc.send(Command::MoveCursorLeftward);
+                    // } else {
+                    //     println!("moving cursor backward...");
+                    //     evwc.send(Command::MoveCursorBackward);
+                    // }
                 } else if sc == &37 {
-                    if duration < 0.5 {
-                        println!("moving cursor right...");
-                        evwc.send(Command::MoveCursorRight);
-                    } else {
-                        println!("moving cursor forward...");
-                        evwc.send(Command::MoveCursorForward);
+
+                    if controller.is_pressed(39){
+                        evwc.send(Command::MoveCursorRightward)
+                    } else{
+                        evwc.send(Command::MoveCursorUpward)
                     }
+
+                    // if duration < 0.5 {
+                    //     println!("moving cursor right...");
+                    //     evwc.send(Command::MoveCursorRightward);
+                    // } else {
+                    //     println!("moving cursor forward...");
+                    //     evwc.send(Command::MoveCursorForward);
+                    // }
                 } else if sc == &28 {
                     println!("adding a line before...");
                     evwc.send(Command::NewLineBefore);
@@ -127,10 +141,12 @@ fn input(
                 evwc.send(Command::PutCharAfterCursor(ch));
             }
         } else {
-            if sc == &57 {
-                // evwc.send(Command::PutCharAfterCursor(' '));
+            if let Some(duration) = controller.release(sc, time){
+                println!("duration: {:.3}", duration);
+                if sc == &57 && duration < 0.2{
+                    evwc.send(Command::PutCharAfterCursor(' '));
+                }
             }
-            controller.release(sc, time.seconds_since_startup());
         }
     }
     // controller.print_dbg();
