@@ -18,10 +18,15 @@ impl Backend {
         match c {
             Command::MoveCursorRightward => self.move_cursor_rightward(),
             Command::MoveCursorLeftward => self.move_cursor_leftward(),
-            Command::MoveCursorForward => self.move_cursor_forward(),
-            Command::MoveCursorBackward => self.move_cursor_backward(),
+
             Command::MoveCursorUpward => self.move_cursor_upward(),
             Command::MoveCursorDownward => self.move_cursor_downward(),
+
+            Command::MoveCursorForward => self.move_cursor_forward(),
+            Command::MoveCursorBackward => self.move_cursor_backward(),
+
+            Command::MoveCursorToTheFirstChar => self.move_cursor_to_the_first_char(),
+            Command::MoveCursorToTheEndOfTheLine => self.move_cursor_to_the_end_of_the_line(),
 
             Command::PutCharAfterCursor(ch) => {
                 self.put_char_after_cursor(*ch);
@@ -30,7 +35,7 @@ impl Backend {
             Command::NewLineAfter => self.new_line_after(),
             Command::NewLineBefore => self.new_line_before(),
 
-            Command::RemoveUnderCursor => self.remove_char_under_cursor(),
+            Command::RemoveCharBeforeCursor => self.remove_char_before_cursor(),
             Command::Sequence(v) => {
                 for c in v {
                     self.execute(c)
@@ -43,7 +48,6 @@ impl Backend {
             }
         }
         self.print_position()
-
     }
 
     //imma not sure if this should be public
@@ -65,7 +69,7 @@ impl Backend {
         self.text.insert(self.line, (String::new(), 0));
     }
 
-    fn remove_char_under_cursor(&mut self) {
+    fn remove_char_before_cursor(&mut self) {
         if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
             if line.len() == 0 {
                 return;
@@ -90,10 +94,23 @@ impl Backend {
             prev(line, cur_ind);
         }
     }
+
+    fn move_cursor_upward(&mut self) {
+        if self.line > 0 {
+            self.line -= 1;
+        }
+    }
+
+    fn move_cursor_downward(&mut self) {
+        if self.line + 1 < self.text.len() {
+            self.line += 1;
+        }
+    }
+
     //refactor to use existing methods. just check if on the end on the string.
     fn move_cursor_forward(&mut self) {
         if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
-            if line.len() == *cur_ind{
+            if line.len() == *cur_ind {
                 if self.text.len() > self.line + 1 {
                     self.line += 1;
                 }
@@ -104,8 +121,8 @@ impl Backend {
     }
 
     fn move_cursor_backward(&mut self) {
-        if let Some((line, cur_ind)) = self.text.get_mut(self.line) {
-            if* cur_ind == 0{
+        if let Some((_, cur_ind)) = self.text.get_mut(self.line) {
+            if *cur_ind == 0 {
                 if self.line > 0 {
                     self.line -= 1;
                 }
@@ -115,15 +132,15 @@ impl Backend {
         }
     }
 
-    fn move_cursor_upward(&mut self){
-        if self.line > 0{
-            self.line-=1;
+    fn move_cursor_to_the_end_of_the_line(&mut self) {
+        if let Some((s, i)) = self.text.get_mut(self.line) {
+            *i = s.len();
         }
     }
 
-    fn move_cursor_downward(&mut self){
-        if self.line + 1 < self.text.len(){
-            self.line+=1;
+    fn move_cursor_to_the_first_char(&mut self) {
+        if let Some((_, i)) = self.text.get_mut(self.line) {
+            *i = 0;
         }
     }
 
@@ -132,6 +149,7 @@ impl Backend {
     }
 
     //I want to use iterator here, but it pisses me off omg...
+    #[deprecated]
     pub fn lines(&self) -> &[(String, usize)] {
         &self.text
     }
@@ -140,7 +158,7 @@ impl Backend {
         self.line
     }
 
-    pub fn print_position(&self){
+    pub fn print_position(&self) {
         println!("({}, {})", self.line, self.text.get(self.line).unwrap().1)
     }
 
