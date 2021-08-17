@@ -47,7 +47,6 @@ impl Backend {
                 }
             }
         }
-        self.print_position()
     }
 
     //imma not sure if this should be public
@@ -158,8 +157,8 @@ impl Backend {
         self.line
     }
 
-    pub fn print_position(&self) {
-        println!("({}, {})", self.line, self.text.get(self.line).unwrap().1)
+    pub fn position(&self) -> String {
+        format!("({}, {})", self.line, self.text.get(self.line).unwrap().1)
     }
 
     pub fn render(&self) -> String {

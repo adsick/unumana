@@ -190,11 +190,16 @@ fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend>) {
         .value = backend.render();
 }
 
-fn debug_system(time: Res<Time>, controller: Query<&Controller, Changed<Controller>>) {
+fn debug_system(
+    time: Res<Time>,
+    controller: Query<&Controller, Changed<Controller>>,
+    backend: Query<&Backend>,
+) {
     if let Ok(controller) = controller.single() {
         controller.print_dbg();
         println!(
-            "mode: {:?}, time: {:.3}\n",
+            "{} mode: {:?}, time: {:.3}\n",
+            backend.single().unwrap().position(),
             controller.mode,
             time.seconds_since_startup()
         );
