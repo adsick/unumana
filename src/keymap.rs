@@ -7,8 +7,8 @@ pub enum Keymap {
 impl Keymap {
     pub fn convert(&self, sc: u32) -> char {
         match self {
-            Keymap::Dvorak => Keymap::dvorak(sc),
-            Keymap::Russian => Keymap::russian(sc),
+            Keymap::Dvorak => sc.dvorak(),
+            Keymap::Russian => sc.russian(),
         }
     }
     pub fn switch(&mut self) {
@@ -152,3 +152,19 @@ impl Keymap {
 //57419 is Left
 //57421 is Right
 //57424 is Down
+
+//this is for convenience
+pub trait Convert {
+    fn dvorak(self) -> char;
+    fn russian(self) -> char;
+}
+
+impl Convert for u32 {
+    fn dvorak(self) -> char {
+        Keymap::dvorak(self.into())
+    }
+
+    fn russian(self) -> char {
+        Keymap::russian(self.into())
+    }
+}

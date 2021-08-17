@@ -50,17 +50,12 @@ impl Controller {
     }
 
     pub fn print_dbg(&self) {
+        use crate::keymap::Convert;
         print!("pressed: ");
         let pressed = self
             .pressed
             .iter()
-            .map(|(sc, _)| {
-                format!(
-                    "{}({})",
-                    sc,
-                    crate::keymap::Keymap::dvorak(*sc).replace_if_eq('\n', 'E')
-                )
-            })
+            .map(|(sc, _)| format!("{}({})", sc, sc.dvorak().replace_if_eq('\n', 'E')))
             .collect::<Vec<String>>()
             .join("; ");
         println!("{}", pressed);
@@ -69,13 +64,7 @@ impl Controller {
         let released = self
             .released
             .iter()
-            .map(|(sc, _)| {
-                format!(
-                    "{}({})",
-                    sc,
-                    crate::keymap::Keymap::dvorak(*sc).replace_if_eq('\n', 'E')
-                )
-            })
+            .map(|(sc, _)| format!("{}({})", sc, sc.dvorak().replace_if_eq('\n', 'E')))
             .collect::<Vec<String>>()
             .join("; ");
         println!("{}", released);
