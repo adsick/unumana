@@ -1,5 +1,5 @@
-use bevy::{core::FixedTimestep, input::keyboard::KeyboardInput, prelude::*};
-use bokken::{Backend, Command, Controller, Editor, Keymap, Mode};
+use bevy::{input::keyboard::KeyboardInput, prelude::*};
+use unumana::{Backend, Command, Controller, Editor, Keymap, Mode};
 
 fn main() {
     //todo run frontend after backend
@@ -86,70 +86,74 @@ fn input(
             key_code: _,
             state,
         } = ki;
+        // in this loop the only thing we want to do is to update the keys in controller
         if state == &bevy::input::ElementState::Pressed {
+            let mut space = false;
             if let Some(duration) = controller.get_pressed_duration(*sc, time) {
-                if *sc == 57 && controller.mode != Mode::Normal && duration > 0.5 {
-                    controller.mode = Mode::Normal;
-                    println!("57 triggered Normal mode, duration: {:.3}", duration);
-                    // return;
+                if *sc == 57 {
+                    if controller.mode != Mode::Normal && duration > 0.5 {
+                        controller.mode = Mode::Normal;
+                        println!("57 triggered Normal mode, duration: {:.3}", duration);
+                        continue;
+                    }
+                    space = true;
                 }
-            } else {
-                controller.press(sc, time);
-                println!("{} just pressed", sc);
+            }
+            controller.press(sc, time);
+            println!("{} just pressed", sc);
 
-                if controller.mode == Mode::Normal {
-                    if sc == &34 {
-                        controller.mode = Mode::Insert;
-                    } else if sc == &30 {
-                        evwc.send(Command::MoveCursorRightward);
-                        controller.mode = Mode::Insert;
-                    }
+            if controller.mode == Mode::Normal {
+                if sc == &34 {
+                    controller.mode = Mode::Insert;
+                } else if sc == &30 {
+                    evwc.send(Command::MoveCursorRightward);
+                    controller.mode = Mode::Insert;
+                }
 
-                    let extra = controller.is_pressed(32);
+                let extra = space || *sc == 57; //controller.is_pressed(32);
 
-                    if sc == &36 {
-                        if controller.is_pressed(33) {
-                            //U serves as mod key here
-                            if extra {
-                                evwc.send(Command::MoveCursorToTheFirstChar)
-                            } else {
-                                evwc.send(Command::MoveCursorLeftward);
-                            }
+                if sc == &36 {
+                    if controller.is_pressed(33) {
+                        //U serves as mod key here
+                        if extra {
+                            evwc.send(Command::MoveCursorToTheFirstChar)
                         } else {
-                            evwc.send(Command::MoveCursorDownward);
-                            //todo extra for moving to the end of file
+                            evwc.send(Command::MoveCursorLeftward);
                         }
-                    } else if sc == &37 {
-                        if controller.is_pressed(33) {
-                            if extra {
-                                evwc.send(Command::MoveCursorToTheEndOfTheLine)
-                            } else {
-                                evwc.send(Command::MoveCursorRightward)
-                            }
-                        } else {
-                            evwc.send(Command::MoveCursorUpward)
-                            //todo extra for moving to the beginning of the file
-                        }
-                    }
-                } else if controller.mode == Mode::Insert {
-                    if sc == &57 {
-                        return;
-                    }
-                    if sc == &58 {
-                        //Caps
-                        keymap.switch();
-                    } else if sc == &14 {
-                        //Backspace
-                        evwc.send(Command::RemoveCharBeforeCursor)
-                    } else if sc == &28 {
-                        evwc.send(Command::NewLineAfter)
                     } else {
-                        let mut ch = keymap.convert(*sc);
-                        controller
-                            .is_pressed(42)
-                            .then(|| ch = ch.to_uppercase().next().unwrap());
-                        evwc.send(Command::PutCharAfterCursor(ch));
+                        evwc.send(Command::MoveCursorDownward);
+                        //todo extra for moving to the end of file
                     }
+                } else if sc == &37 {
+                    if controller.is_pressed(33) {
+                        if extra {
+                            evwc.send(Command::MoveCursorToTheEndOfTheLine)
+                        } else {
+                            evwc.send(Command::MoveCursorRightward)
+                        }
+                    } else {
+                        evwc.send(Command::MoveCursorUpward)
+                        //todo extra for moving to the beginning of the file
+                    }
+                }
+            } else if controller.mode == Mode::Insert {
+                if sc == &57 {
+                    return;
+                }
+                if sc == &58 {
+                    //Caps
+                    keymap.switch();
+                } else if sc == &14 {
+                    //Backspace
+                    evwc.send(Command::RemoveCharBeforeCursor)
+                } else if sc == &28 {
+                    evwc.send(Command::NewLineAfter)
+                } else {
+                    let mut ch = keymap.convert(*sc);
+                    controller
+                        .is_pressed(42)
+                        .then(|| ch = ch.to_uppercase().next().unwrap());
+                    evwc.send(Command::PutCharAfterCursor(ch));
                 }
             }
         } else {
@@ -164,43 +168,46 @@ fn input(
 }
 
 fn backend_update(
-    // time: Res<Time>,
+    // mut commands: Commands,
     mut backend: Query<&mut Backend>,
     mut evrc: EventReader<Command>,
 ) {
-    // println!("backend_update begin ");
-    // let instant = std::time::Instant::now();
-    let mut backend = backend.single_mut().unwrap();
+    // what if we somehow take ownership of backend,
+    // mutate it asynk tasks and then spawn it again?
+    // let (entity, mut backend) = backend.single_mut().unwrap();
+    // commands.entity(*entity).despawn();
 
+    let mut backend = backend.single_mut().unwrap();
     for c in evrc.iter() {
         backend.execute(c);
     }
-
-    // std::thread::sleep(std::time::Duration::from_millis(100));
 }
 
-fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend>) {
-    let backend = backend.single().unwrap();
-    frontend
-        .single_mut()
-        .unwrap()
-        .sections
-        .first_mut()
-        .unwrap()
-        .value = backend.render();
+fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend, Changed<Backend>>) {
+    if let Ok(backend) = backend.single() {
+        frontend
+            .single_mut()
+            .unwrap()
+            .sections
+            .first_mut()
+            .unwrap()
+            .value = backend.render();
+    }
 }
 
 fn debug_system(
     time: Res<Time>,
     controller: Query<&Controller, Changed<Controller>>,
     backend: Query<&Backend>,
+    keymap: Res<Keymap>,
 ) {
     if let Ok(controller) = controller.single() {
         controller.print_dbg();
         println!(
-            "{} mode: {:?}, time: {:.3}\n",
+            "{} mode: {:?}, keymap: {:?}, time: {:.3}\n",
             backend.single().unwrap().position(),
             controller.mode,
+            keymap,
             time.seconds_since_startup()
         );
     }

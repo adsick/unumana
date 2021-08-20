@@ -1,13 +1,22 @@
 [package]
-name = "bokken"
+name = "unumana"
 authors = ["adsick"]
 version = "0.1.0"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-bevy = "0.5"
-phf = { version = "0.9", features = ["macros"]} #I'm not sure if we will use it as documentation sucks and there are no examples
+#bevy = "0.5"
 
+# I use workspaces so no need to recompile everything everytime
+# to do like so you want to create a folder for your crates in 'bevy' crate
+# root folder, and inside of bevy's Cargo.toml specify workspace member as
+# yourfolder/*
+# so I have bevy/adsick/unumana
+# and in Cargo.toml of bevy crate i have:
+# [workspace]
+#   exclude = ["benches"]
+#   members = ["crates/*", "examples/ios", "tools/ci", "adsick/*"]
+
+# then just uncomment next line and comment or remove line 8
+bevy = {path = "../../../bevy"}
 

@@ -161,10 +161,10 @@ pub trait Convert {
 
 impl Convert for u32 {
     fn dvorak(self) -> char {
-        Keymap::dvorak(self.into())
+        Keymap::dvorak(self)
     }
 
     fn russian(self) -> char {
-        Keymap::russian(self.into())
+        Keymap::russian(self)
     }
 }
