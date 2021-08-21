@@ -5,8 +5,8 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-#bevy = "0.5"
-
+bevy = "0.5"
+bimap = "0.6"
 # I use workspaces so no need to recompile everything everytime
 # to do like so you want to create a folder for your crates in 'bevy' crate
 # root folder, and inside of bevy's Cargo.toml specify workspace member as
@@ -18,5 +18,5 @@ edition = "2018"
 #   members = ["crates/*", "examples/ios", "tools/ci", "adsick/*"]
 
 # then just uncomment next line and comment or remove line 8
-bevy = {path = "../../../bevy"}
+#bevy = {path = "../../../bevy"}
 

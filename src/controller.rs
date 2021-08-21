@@ -55,7 +55,7 @@ impl Controller {
         let pressed = self
             .pressed
             .iter()
-            .map(|(sc, _)| format!("{}({})", sc, sc.dvorak().replace_if_eq('\n', 'E')))
+            .map(|(sc, _)| format!("{}({:?})", sc, sc.dvorak()))
             .collect::<Vec<String>>()
             .join("; ");
         println!("{}", pressed);
@@ -64,13 +64,14 @@ impl Controller {
         let released = self
             .released
             .iter()
-            .map(|(sc, _)| format!("{}({})", sc, sc.dvorak().replace_if_eq('\n', 'E')))
+            .map(|(sc, _)| format!("{}({:?})", sc, sc.dvorak()))
             .collect::<Vec<String>>()
             .join("; ");
         println!("{}", released);
     }
 }
 
+#[deprecated]
 trait Replacable
 where
     Self: Sized + PartialEq,
