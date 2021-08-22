@@ -170,16 +170,16 @@ impl Convert for u32 {
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
     #[test]
-    fn lazy(){
+    fn lazy() {
         let mut c = 0;
-        for i in 0..100{
+        for i in 0..100 {
             let ch = Keymap::russian(i);
-            if ch != '\x00'{
+            if ch != '\x00' {
                 print!("({}, {:?}), ", i, ch);
-                c+=1;
+                c += 1;
             }
         }
         println!("total: {}", c);
