@@ -8,25 +8,31 @@ use bevy::utils::HashMap;
 pub struct Controller {
     pressed: HashMap<u32, f64>,  //sc and the time when it was pressed
     released: HashMap<u32, f64>, //sc, time when it was released and time when it was pressed before this release
+    last_pressed: (u32, f64),
+    last_released: (u32, f64),
     pub mode: Mode,
 }
 
 impl Controller {
-    pub fn press(&mut self, sc: &u32, time: f64) -> f64 {
-        let mut prev = 0.0;
-        if let Some(t) = self.released.remove(&sc) {
-            prev = t;
+    pub fn press(&mut self, sc: &u32, time: f64) -> ((u32, f64), (u32, f64)) {
+        
+        self.released.remove(&sc);
+        let last_released = self.last_released;
+        let last_pressed = self.last_pressed;
+        if !self.pressed.contains_key(sc){
+            self.pressed.insert(*sc, time);
+            self.last_pressed = (*sc, time);
         }
-
-        self.pressed.entry(*sc).or_insert(time);
-        return prev;
+        (last_released, last_pressed)
     }
 
-    pub fn release(&mut self, sc: &u32, time: f64) -> Option<f64> {
+    pub fn release(&mut self, sc: &u32, time: f64) -> Option<((u32, f64), (u32, f64), f64)> {
         if let Some(t) = self.pressed.remove(sc) {
-            let duration = time - t;
-            self.released.insert(*sc, duration);
-            return Some(duration);
+            let last_pressed = self.last_pressed;
+            let last_released = self.last_released;
+            self.released.insert(*sc, time);
+            self.last_released = (*sc, time);
+            return Some((last_pressed, last_released, t));
         }
         return None;
     }
@@ -60,14 +66,14 @@ impl Controller {
             .join("; ");
         println!("{}", pressed);
 
-        print!("released: ");
-        let released = self
-            .released
-            .iter()
-            .map(|(sc, _)| format!("{}({:?})", sc, sc.dvorak()))
-            .collect::<Vec<String>>()
-            .join("; ");
-        println!("{}", released);
+        // print!("released: ");
+        // let released = self
+        //     .released
+        //     .iter()
+        //     .map(|(sc, _)| format!("{}({:?})", sc, sc.dvorak()))
+        //     .collect::<Vec<String>>()
+        //     .join("; ");
+        // println!("{}", released);
     }
 }
 

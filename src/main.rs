@@ -15,7 +15,7 @@ fn main() {
         .run();
 }
 
-struct AnimateTranslation;
+struct Scrollable;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //let bold_font = asset_server.load("terminal_land/TerminalLandMono-Bold.otf");
@@ -42,20 +42,20 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(Text2dBundle {
             text: Text::with_section(
-                "writer regular font.".to_string(),
+                "".to_string(),
                 regular.clone(),
                 text_alignment,
             ),
             ..Default::default()
         })
-        .insert(AnimateTranslation);
+        .insert(Scrollable);
 
     commands.insert_resource(Keymap::Dvorak);
 }
 
 fn scroll_system(
     time: Res<Time>,
-    mut query: Query<&mut Transform, (With<Text>, With<AnimateTranslation>)>,
+    mut query: Query<&mut Transform, (With<Text>, With<Scrollable>)>,
     controller: Query<&Controller>,
 ) {
     let controller = controller.single().unwrap();
@@ -66,7 +66,7 @@ fn scroll_system(
     for mut transform in query.iter_mut() {
         transform.translation.y += 500.0 * time.delta_seconds() * vert as f32;
         transform.translation.x += 500.0 * time.delta_seconds() * horiz as f32;
-        // dbg!(transform.translation);
+        //dbg!(transform.translation);
     }
 }
 
@@ -98,9 +98,12 @@ fn input(
                     }
                     space = true;
                 }
+            } else {
+                let last = controller.press(sc, time);
+                println!("{} just pressed", sc);
+                println!("r({})p({}) gap is {:.3}", last.0.0, sc, time - last.0.1);
+                println!("p({})p({}) gap is {:.3}\n", last.1.0, sc, time - last.1.1);
             }
-            controller.press(sc, time);
-            println!("{} just pressed", sc);
 
             if controller.mode == Mode::Normal {
                 if sc == &34 {
@@ -157,8 +160,11 @@ fn input(
                 }
             }
         } else {
-            if let Some(duration) = controller.release(sc, time) {
+            if let Some((last_pressed, last_released, t)) = controller.release(sc, time) {
+                let duration = time - t;
                 println!("{} just released, duration: {:.3}", sc, duration);
+                println!("p({})r({}) gap is {:.3}", last_pressed.0, sc, time - last_pressed.1);
+                println!("r({})r({}) gap is {:.3}\n", last_released.0, sc,  time - last_released.1);
                 if controller.mode == Mode::Insert && sc == &57 && duration < 0.2 {
                     evwc.send(Command::PutCharAfterCursor(' '));
                 }
@@ -172,7 +178,7 @@ fn backend_update(
     mut backend: Query<&mut Backend>,
     mut evrc: EventReader<Command>,
 ) {
-    // what if we somehow take ownership of backend,
+    // what if we somehow take ownership of the backend,
     // mutate it asynk tasks and then spawn it again?
     // let (entity, mut backend) = backend.single_mut().unwrap();
     // commands.entity(*entity).despawn();

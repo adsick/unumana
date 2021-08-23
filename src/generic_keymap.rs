@@ -44,9 +44,13 @@ impl Keymap {
 
     pub fn remap(&mut self, sc: u32, ch: char) {
         match self.get_current_mut().map.insert(sc, ch) {
-            bimap::Overwritten::Neither => {#[cfg(any(test, debug_assertions))]println!("brand new map ({}<>{:?})", sc, ch)}
+            bimap::Overwritten::Neither => {
+                #[cfg(any(test, debug_assertions))]
+                println!("brand new map ({}<>{:?})", sc, ch)
+            }
             bimap::Overwritten::Left(l, r) => {
-                #[cfg(any(test, debug_assertions))]println!("scancode {} already exists in the map, it was pointing to  {:?}, now it points to {:?}\n", l, r, ch)
+                #[cfg(any(test, debug_assertions))]
+                println!("scancode {} already exists in the map, it was pointing to  {:?}, now it points to {:?}\n", l, r, ch)
             }
 
             bimap::Overwritten::Right(l, r) => {
@@ -59,7 +63,8 @@ impl Keymap {
             bimap::Overwritten::Pair(_, _) => (),
             bimap::Overwritten::Both((l1, r1), (l2, r2)) => {
                 self.get_current_mut().map.insert(l2, r1);
-                #[cfg(any(test, debug_assertions))]println!("swap. {:?} was binded to {} and {:?} was binded to {}.\nnow it is ({}<>{:?}) and ({}<>{:?})\n", r1, l1, r2, l2, sc, ch, l2, r1)
+                #[cfg(any(test, debug_assertions))]
+                println!("swap. {:?} was binded to {} and {:?} was binded to {}.\nnow it is ({}<>{:?}) and ({}<>{:?})\n", r1, l1, r2, l2, sc, ch, l2, r1)
             }
         }
     }
@@ -108,18 +113,18 @@ pub mod test_keymap {
         assert_eq!(k.convert(30), 'a');
 
         k.next();
-        
+
         assert_eq!(k.convert(30), 'ф');
         assert_eq!(k.name(), "russian");
-        
+
         k.next();
-        
+
         assert_eq!(k.convert(30), 'a');
         assert_eq!(k.name(), "dvorak");
-        
+
         k.remap(30, 'A');
         assert_eq!(k.convert(30), 'A');
-        
+
         let mut k = Keymap::new();
 
         //here we test swapping 'a' and 'o'
