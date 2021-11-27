@@ -1,10 +1,10 @@
 mod mode;
 pub use mode::*;
 
-use bevy::utils::HashMap;
+use bevy::{prelude::Component, utils::HashMap};
 
 //#[derive(Bundle)]
-#[derive(Default)]
+#[derive(Default, Component)]
 pub struct Controller {
     pressed: HashMap<u32, f64>,  //sc and the time when it was pressed
     released: HashMap<u32, f64>, //sc, time when it was released and time when it was pressed before this release

@@ -1,3 +1,5 @@
+use bevy::prelude::Component;
+
 use crate::Command;
 
 pub struct CurrentLine(usize);
@@ -28,6 +30,7 @@ impl Line {
         Line(String::new(), 0)
     }
 }
+#[derive(Component)]
 pub struct Backend {
     line: CurrentLine, //current line
     text: Text,        //last valid utf-8 byte indx
@@ -200,10 +203,13 @@ impl Backend {
 //mutates cur_ind to sit on previous char
 //it is better to use external crates for this I guess
 fn prev(str: &str, cur_ind: &mut usize) {
-    if *cur_ind == 0 {
-        return;
-    }
-    if let Some((ind, _)) = str.get(..*cur_ind).unwrap().char_indices().rev().next() {
+    // if *cur_ind == 0 {
+    //     return;
+    // }
+    // if let Some((ind, _)) = str.get(..*cur_ind).unwrap().char_indices().rev().next() {
+    //     *cur_ind = ind;
+    // }
+    if let Some(Some((ind, _))) = str.get(..*cur_ind).map(|s|s.char_indices().rev().next()) {
         *cur_ind = ind;
     }
 }

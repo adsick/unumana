@@ -15,6 +15,7 @@ fn main() {
         .run();
 }
 
+#[derive(Component)]
 struct Scrollable;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -58,7 +59,7 @@ fn scroll_system(
     mut query: Query<&mut Transform, (With<Text>, With<Scrollable>)>,
     controller: Query<&Controller>,
 ) {
-    let controller = controller.single().unwrap();
+    let controller = controller.single();
 
     let vert = controller.is_pressed(57416) as i32 - controller.is_pressed(57424) as i32;
     let horiz = controller.is_pressed(57421) as i32 - controller.is_pressed(57419) as i32;
@@ -77,7 +78,7 @@ fn input(
     mut evwc: EventWriter<Command>,
     mut keymap: ResMut<Keymap>,
 ) {
-    let mut controller = controller.single_mut().unwrap();
+    let mut controller = controller.single_mut();
     let time = time.seconds_since_startup();
 
     for ki in input.iter() {
@@ -183,22 +184,24 @@ fn backend_update(
     // let (entity, mut backend) = backend.single_mut().unwrap();
     // commands.entity(*entity).despawn();
 
-    let mut backend = backend.single_mut().unwrap();
+    let mut backend = backend.single_mut();
     for c in evrc.iter() {
         backend.execute(c);
     }
 }
 
 fn frontend_update(mut frontend: Query<&mut Text>, backend: Query<&Backend, Changed<Backend>>) {
-    if let Ok(backend) = backend.single() {
+    if backend.is_empty(){
+        return;
+    }
+    let backend = backend.single();
         frontend
             .single_mut()
-            .unwrap()
             .sections
             .first_mut()
             .unwrap()
             .value = backend.render();
-    }
+    
 }
 
 fn debug_system(
@@ -207,14 +210,17 @@ fn debug_system(
     backend: Query<&Backend>,
     keymap: Res<Keymap>,
 ) {
-    if let Ok(controller) = controller.single() {
+    if controller.is_empty(){
+        return;
+    }
+    let controller = controller.single();
         controller.print_dbg();
         println!(
             "{} mode: {:?}, keymap: {:?}, time: {:.3}\n",
-            backend.single().unwrap().position(),
+            backend.single().position(),
             controller.mode,
             keymap,
             time.seconds_since_startup()
         );
-    }
+    
 }
