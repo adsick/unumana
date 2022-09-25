@@ -3,24 +3,29 @@ use bevy::prelude::Component;
 use crate::Command;
 
 pub struct CurrentLine(usize);
-pub struct Text {
+struct TextBuffer {
     lines: Vec<Line>,
 }
 
-impl Text {
+impl TextBuffer {
     pub fn new() -> Self {
-        Text {
+        TextBuffer {
             lines: vec![Line::new()],
         }
     }
     pub fn len(&self) -> usize {
         self.lines.len()
     }
-    pub fn get(&self, index: usize) -> Option<&Line> {
+    pub fn get_line(&self, index: usize) -> Option<&Line> {
         self.lines.get(index)
     }
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut Line> {
+    pub fn get_line_mut(&mut self, index: usize) -> Option<&mut Line> {
         self.lines.get_mut(index)
+    }
+
+    /// allocate a new line at the specified index
+    pub fn new_line(&mut self, index: usize){
+        self.lines.insert(index, Line::new())
     }
 }
 pub struct Line(String, usize);
@@ -33,14 +38,14 @@ impl Line {
 #[derive(Component)]
 pub struct Backend {
     line: CurrentLine, //current line
-    text: Text,        //last valid utf-8 byte indx
+    text: TextBuffer,
 }
 
 impl Default for Backend {
     fn default() -> Self {
         Backend {
             line: CurrentLine(0),
-            text: Text::new(),
+            text: TextBuffer::new(),
         }
     }
 }
@@ -82,16 +87,16 @@ impl Backend {
 
     //imma not sure if this should be public
     fn put_char_after_cursor(&mut self, ch: char) {
-        if let Some(Line(line, cur_ind)) = self.text.lines.get_mut(self.line.0) {
+        if let Some(Line(line, cur_ind)) = self.text.get_line_mut(self.line.0) {
             line.insert(*cur_ind, ch);
             *cur_ind += ch.len_utf8();
         } else {
-            panic!("cursor is out of lines");
+            panic!("cursor is out of lines"); //todo move it to the right position
         }
     }
 
     fn new_line_after(&mut self) {
-        self.text.lines.insert(self.line.0 + 1, Line::new());
+        self.text.new_line(self.line() + 1);
         self.line.0 += 1;
     }
 
@@ -138,7 +143,7 @@ impl Backend {
 
     //refactor to use existing methods. just check if on the end on the string.
     fn move_cursor_forward(&mut self) {
-        if let Some(Line(line, cur_ind)) = self.text.get_mut(self.line.0) {
+        if let Some(Line(line, cur_ind)) = self.text.get_line_mut(self.line.0) {
             if line.len() == *cur_ind {
                 if self.text.len() > self.line.0 + 1 {
                     self.line.0 += 1;
@@ -150,7 +155,7 @@ impl Backend {
     }
 
     fn move_cursor_backward(&mut self) {
-        if let Some(Line(_, cur_ind)) = self.text.get_mut(self.line.0) {
+        if let Some(Line(_, cur_ind)) = self.text.get_line_mut(self.line.0) {
             if *cur_ind == 0 {
                 if self.line.0 > 0 {
                     self.line.0 -= 1;
@@ -162,13 +167,13 @@ impl Backend {
     }
 
     fn move_cursor_to_the_end_of_the_line(&mut self) {
-        if let Some(Line(s, i)) = self.text.get_mut(self.line.0) {
+        if let Some(Line(s, i)) = self.text.get_line_mut(self.line.0) {
             *i = s.len();
         }
     }
 
     fn move_cursor_to_the_first_char(&mut self) {
-        if let Some(Line(_, i)) = self.text.get_mut(self.line.0) {
+        if let Some(Line(_, i)) = self.text.get_line_mut(self.line.0) {
             *i = 0;
         }
     }
@@ -186,7 +191,7 @@ impl Backend {
         format!(
             "({}, {})",
             self.line.0,
-            self.text.get(self.line.0).unwrap().1
+            self.text.get_line(self.line.0).unwrap().1
         )
     }
 

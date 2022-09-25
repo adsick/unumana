@@ -1,4 +1,5 @@
-use bevy::ecs::bundle::Bundle;
+pub use bevy::{input::keyboard::KeyboardInput, prelude::*};
+pub use bevy_prototype_lyon::prelude::*;
 
 mod backend;
 mod command;
@@ -11,6 +12,13 @@ pub use command::*;
 pub use controller::*;
 pub use generic_keymap::*;
 pub use keymap::*;
+//systems
+mod setup;
+pub use setup::setup;
+
+mod input;
+pub use input::input_system;
+
 
 #[derive(Bundle, Default)]
 pub struct Editor {
@@ -25,8 +33,11 @@ impl Editor {
     }
 }
 
-// #[derive(Default)]
-// pub struct Cursor {
-//     line: usize,
-//     column: usize,
-// }
+#[derive(Component)]
+pub struct Scrollable;
+
+#[derive(Component)]
+pub struct Content;
+
+#[derive(Component)]
+pub struct StatusLine;

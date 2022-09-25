@@ -14,24 +14,24 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn press(&mut self, sc: &u32, time: f64) -> ((u32, f64), (u32, f64)) {
+    pub fn press(&mut self, sc: u32, time: f64) -> ((u32, f64), (u32, f64)) {
         
-        self.released.remove(&sc);
         let last_released = self.last_released;
         let last_pressed = self.last_pressed;
-        if !self.pressed.contains_key(sc){
-            self.pressed.insert(*sc, time);
-            self.last_pressed = (*sc, time);
+        if !self.is_pressed(sc){
+            self.released.remove(&sc);
+            self.pressed.insert(sc, time);
+            self.last_pressed = (sc, time);
         }
         (last_released, last_pressed)
     }
 
-    pub fn release(&mut self, sc: &u32, time: f64) -> Option<((u32, f64), (u32, f64), f64)> {
-        if let Some(t) = self.pressed.remove(sc) {
+    pub fn release(&mut self, sc: u32, time: f64) -> Option<((u32, f64), (u32, f64), f64)> {
+        if let Some(t) = self.pressed.remove(&sc) {
             let last_pressed = self.last_pressed;
             let last_released = self.last_released;
-            self.released.insert(*sc, time);
-            self.last_released = (*sc, time);
+            self.released.insert(sc, time);
+            self.last_released = (sc, time);
             return Some((last_pressed, last_released, t));
         }
         return None;
@@ -46,7 +46,7 @@ impl Controller {
         self.pressed.get(&sc).map(|t| time - t)
     }
 
-    pub fn together(&self, sc1: u32, sc2: u32) -> bool {
+    pub fn cascade(&self, sc1: u32, sc2: u32) -> bool {
         if let Some(t1) = self.pressed.get(&sc1) {
             if let Some(t2) = self.pressed.get(&sc2) {
                 return t1 < t2;
@@ -76,18 +76,3 @@ impl Controller {
         // println!("{}", released);
     }
 }
-
-#[deprecated]
-trait Replacable
-where
-    Self: Sized + PartialEq,
-{
-    fn replace_if_eq(self, val: Self, default: Self) -> Self {
-        if self == val {
-            return default;
-        }
-        return self;
-    }
-}
-//а что если я хочу "автоматическую" реализацию для всех типов, которые подходят под ограничения?
-impl<T: PartialEq> Replacable for T {}
