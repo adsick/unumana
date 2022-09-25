@@ -1,13 +1,13 @@
 #[derive(PartialEq, Debug)]
-pub enum Mode {
+pub enum ControllerMode {
     Normal,
     Insert,
     Visual,
     Halted,
 }
 
-impl Default for Mode {
+impl Default for ControllerMode {
     fn default() -> Self {
-        Mode::Normal
+        ControllerMode::Normal
     }
 }

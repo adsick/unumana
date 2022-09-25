@@ -21,8 +21,8 @@ pub fn input_system(
             let mut space = false;
             if let Some(duration) = controller.get_pressed_duration(sc, time) {
                 if sc == 57 {
-                    if controller.mode != Mode::Normal && duration > 0.5 {
-                        controller.mode = Mode::Normal;
+                    if controller.mode != ControllerMode::Normal && duration > 0.5 {
+                        controller.mode = ControllerMode::Normal;
                         println!("57 triggered Normal mode, duration: {:.3}", duration);
                         continue;
                     }
@@ -35,12 +35,12 @@ pub fn input_system(
                 println!("p({})p({}) gap is {:.3}\n", last.1 .0, sc, time - last.1 .1);
             }
 
-            if controller.mode == Mode::Normal {
+            if controller.mode == ControllerMode::Normal {
                 if sc == 34 {
-                    controller.mode = Mode::Insert;
+                    controller.mode = ControllerMode::Insert;
                 } else if sc == 30 {
                     evwc.send(Command::MoveCursorRightward);
-                    controller.mode = Mode::Insert;
+                    controller.mode = ControllerMode::Insert;
                 }
 
                 let extra = space || sc == 57; //controller.is_pressed(32);
@@ -69,7 +69,7 @@ pub fn input_system(
                         //todo extra for moving to the beginning of the file
                     }
                 }
-            } else if controller.mode == Mode::Insert {
+            } else if controller.mode == ControllerMode::Insert {
                 if sc == 57 {
                     return;
                 }
@@ -116,7 +116,7 @@ pub fn input_system(
                     sc,
                     time - last_released.1
                 );
-                if controller.mode == Mode::Insert && sc == 57 && duration < 0.2 {
+                if controller.mode == ControllerMode::Insert && sc == 57 && duration < 0.2 {
                     evwc.send(Command::PutCharAfterCursor(' '));
                 }
             }

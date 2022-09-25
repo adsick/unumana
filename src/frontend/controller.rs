@@ -1,7 +1,6 @@
-mod mode;
-pub use mode::*;
-
 use bevy::{prelude::Component, utils::HashMap};
+
+use super::ControllerMode;
 
 //#[derive(Bundle)]
 #[derive(Default, Component)]
@@ -10,7 +9,7 @@ pub struct Controller {
     released: HashMap<u32, f64>, //sc, time when it was released and time when it was pressed before this release
     last_pressed: (u32, f64),
     last_released: (u32, f64),
-    pub mode: Mode,
+    pub mode: ControllerMode,
 }
 
 impl Controller {
@@ -55,15 +54,22 @@ impl Controller {
         return false;
     }
 
+
+
+    // this is a bit cursed since it is defined in Controller and we don't have
+    // acces to the keymap to show human readable key code, so it uses old fixed_keymap
     pub fn print_dbg(&self) {
-        use crate::keymap::Convert;
+        use crate::fixed_keymap::Convert;
         print!("pressed: ");
+
+
         let pressed = self
             .pressed
             .iter()
             .map(|(sc, _)| format!("{}({:?})", sc, sc.dvorak()))
             .collect::<Vec<String>>()
-            .join("; ");
+            .join(", ");
+
         println!("{}", pressed);
 
         // print!("released: ");

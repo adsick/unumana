@@ -2,16 +2,14 @@ pub use bevy::{input::keyboard::KeyboardInput, prelude::*};
 pub use bevy_prototype_lyon::prelude::*;
 
 mod backend;
-mod command;
-mod controller;
+mod frontend;
 mod generic_keymap;
-mod keymap; //may be renamed to just keymap in the future
+mod fixed_keymap; //may be renamed to just keymap in the future
 
 pub use backend::*;
-pub use command::*;
-pub use controller::*;
+pub use frontend::*;
 pub use generic_keymap::*;
-pub use keymap::*;
+pub use fixed_keymap::*;
 //systems
 mod setup;
 pub use setup::setup;

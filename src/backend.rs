@@ -1,40 +1,12 @@
 use bevy::prelude::Component;
 
-use crate::Command;
+pub mod command;
+pub mod buffer;
 
+pub use command::Command;
+pub use buffer::{TextBuffer, Line};
 pub struct CurrentLine(usize);
-struct TextBuffer {
-    lines: Vec<Line>,
-}
 
-impl TextBuffer {
-    pub fn new() -> Self {
-        TextBuffer {
-            lines: vec![Line::new()],
-        }
-    }
-    pub fn len(&self) -> usize {
-        self.lines.len()
-    }
-    pub fn get_line(&self, index: usize) -> Option<&Line> {
-        self.lines.get(index)
-    }
-    pub fn get_line_mut(&mut self, index: usize) -> Option<&mut Line> {
-        self.lines.get_mut(index)
-    }
-
-    /// allocate a new line at the specified index
-    pub fn new_line(&mut self, index: usize){
-        self.lines.insert(index, Line::new())
-    }
-}
-pub struct Line(String, usize);
-
-impl Line {
-    pub fn new() -> Self {
-        Line(String::new(), 0)
-    }
-}
 #[derive(Component)]
 pub struct Backend {
     line: CurrentLine, //current line
@@ -49,6 +21,7 @@ impl Default for Backend {
         }
     }
 }
+
 impl Backend {
     pub fn execute(&mut self, c: &Command) -> () {
         match c {
@@ -101,11 +74,11 @@ impl Backend {
     }
 
     fn new_line_before(&mut self) {
-        self.text.lines.insert(self.line.0, Line::new());
+        self.text.new_line(self.line.0);
     }
 
     fn remove_char_before_cursor(&mut self) {
-        if let Some(Line(line, cur_ind)) = self.text.lines.get_mut(self.line.0) {
+        if let Some(Line(line, cur_ind)) = self.text.get_line_mut(self.line.0) {
             if line.len() == 0 {
                 return;
             }
@@ -116,7 +89,7 @@ impl Backend {
 
     //safety: we assume that cur_ind is valid.
     fn move_cursor_rightward(&mut self) {
-        if let Some(Line(line, cur_ind)) = self.text.lines.get_mut(self.line.0) {
+        if let Some(Line(line, cur_ind)) = self.text.get_line_mut(self.line.0) {
             if let Some(ch) = line.get(*cur_ind..).unwrap().chars().next() {
                 *cur_ind += ch.len_utf8();
             }
@@ -124,7 +97,7 @@ impl Backend {
     }
 
     fn move_cursor_leftward(&mut self) {
-        if let Some(Line(line, cur_ind)) = self.text.lines.get_mut(self.line.0) {
+        if let Some(Line(line, cur_ind)) = self.text.get_line_mut(self.line.0) {
             prev(line, cur_ind);
         }
     }
@@ -195,10 +168,10 @@ impl Backend {
         )
     }
 
+    // this is not "render", this is more like a dumb way of obtaining text from the buf.
     pub fn render(&self) -> String {
         self.text
-            .lines
-            .iter()
+            .lines()
             .map(|item| item.0.to_owned())
             .collect::<Vec<String>>()
             .join("\n")

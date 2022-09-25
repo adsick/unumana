@@ -1,20 +1,22 @@
+#![deprecated] // not sure about this, but you probably don't wanna using it.
+
 #[derive(Debug, PartialEq)]
-pub enum Keymap {
+pub enum FixedKeymap {
     Dvorak,
     Russian,
 }
 
-impl Keymap {
+impl FixedKeymap {
     pub fn convert(&self, sc: u32) -> char {
         match self {
-            Keymap::Dvorak => sc.dvorak(),
-            Keymap::Russian => sc.russian(),
+            FixedKeymap::Dvorak => sc.dvorak(),
+            FixedKeymap::Russian => sc.russian(),
         }
     }
     pub fn switch(&mut self) {
         *self = match *self {
-            Keymap::Dvorak => Keymap::Russian,
-            Keymap::Russian => Keymap::Dvorak,
+            FixedKeymap::Dvorak => FixedKeymap::Russian,
+            FixedKeymap::Russian => FixedKeymap::Dvorak,
         };
     }
     pub fn dvorak(sc: u32) -> char {
@@ -161,11 +163,11 @@ pub trait Convert {
 
 impl Convert for u32 {
     fn dvorak(self) -> char {
-        Keymap::dvorak(self)
+        FixedKeymap::dvorak(self)
     }
 
     fn russian(self) -> char {
-        Keymap::russian(self)
+        FixedKeymap::russian(self)
     }
 }
 
@@ -176,7 +178,7 @@ mod tests {
     fn lazy() {
         let mut c = 0;
         for i in 0..100 {
-            let ch = Keymap::russian(i);
+            let ch = FixedKeymap::russian(i);
             if ch != '\x00' {
                 print!("({}, {:?}), ", i, ch);
                 c += 1;
