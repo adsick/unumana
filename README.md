@@ -72,7 +72,7 @@ bevy = {path = "../../../bevy", default-features = false, features = ["x11", "be
 5) now we are finally ready to
 ```bash
 cd adsick
-git clone https://github.com/bevyengine/bevy.git
+git clone https://github.com/adsick/unumana.git
 cd unumana
 cargo run --release
 ```
