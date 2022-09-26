@@ -5,18 +5,18 @@ The main purpose of this project is to build a cross platform text editor that w
 
 ## features
 * <details><summary>modal - you know vim</summary>try and create your custom new modes like numeric mode where all the numbers live on the home row!</details>
-* <details><summary>no keyrepeattttt... (unless makes sence)</summary>keyrepeat is 99% enabled by default everywhere in your OS, but how often you find yourself using it with keys like 'o' ar 'a'? (we're not talking about fellow flooders here). key repeat is disabled by default in unumana, but can be emulated in case needed</details>
+* <details><summary>no keyrepeattttt... (unless makes sense)</summary>keyrepeat is 99% enabled by default everywhere in your OS, but how often you find yourself using it with keys like 'o' ar 'a'? (we're not talking about fellow flooders here). key repeat is disabled by default in unumana, but can be emulated in case needed</details>
 * <details><summary>virtual keymaps</summary> unumana maps scancodes ignoring your OS, it means that using it with "wrong" layout (e.g. cyrillic) is not a problem as it stands with terminal editors like vim or helix.</details>
 * <details><summary>suitable for minimal keyboards</summary>Keyboards are too big. I don't like Fn keys so by default the're not gonna be used. Numpads? same. Note: you still can use whatever you desire, it's all customizable</details>
 
 ### future
 * extensive configurability (keymaps, plugins, themes)
-* ide features (highlighting, rust-analyzen integration)
+* ide features (highlighting, rust-analyzer integration)
 I'm not sure if we'll get this far, <span title="but I hope">sed mi esperas...</span>
 
-bevare of these:
+beware of these:
 * <details><summary>not intended for real word use (as of now)</summary>the project is in early stages of development and therefor is unstable and very feature incomplete, so you should not consider using it in your work or life (you are welcome to try if you are bored though)</details>
-* <details><summary>some input lag is very possible</summary> some is principial due to how keybind resolving will work (sometimes you need to wait before you can detect certain action), some is pure technical and hopefully could be improved on in future updates.</details>
+* <details><summary>some input lag is very possible</summary> some is principal due to how keybind resolving will work (sometimes you need to wait before you can detect certain action), some is pure technical and hopefully could be improved on in future updates.</details>
 * <details><summary>not perfectly smooth (scrolling)</summary> this is probably due to inconsistent time deltas that Bevy provides, see [issue](https://github.com/bevyengine/bevy/issues/4669)</details>
 
 
