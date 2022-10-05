@@ -100,12 +100,11 @@ where
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use crate::controller2::*;
 
-
     #[test]
-    fn basic(){
+    fn basic() {
         let mut tl = Timeline::default();
         tl.push(InputEvent::pressed(1, 1000));
         tl.push(InputEvent::pressed(2, 2000));

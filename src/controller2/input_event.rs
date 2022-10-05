@@ -1,7 +1,6 @@
 use super::{ScanCode, Timestamp};
 
-
-/// Input Event 
+/// Input Event
 /// single piece of user input e.g. key press, key release or mouse move
 /// it is generic over input type I
 #[derive(Debug, Clone, Copy)]
