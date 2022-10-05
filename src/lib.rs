@@ -2,21 +2,21 @@ pub use bevy::{input::keyboard::KeyboardInput, prelude::*};
 pub use bevy_prototype_lyon::prelude::*;
 
 mod backend;
-mod frontend;
-mod generic_keymap;
-mod fixed_keymap; //may be renamed to just keymap in the future
+mod controller;
+mod controller2;
+mod fixed_keymap;
+mod generic_keymap; //may be renamed to just keymap in the future
 
 pub use backend::*;
-pub use frontend::*;
-pub use generic_keymap::*;
+pub use controller::*;
 pub use fixed_keymap::*;
+pub use generic_keymap::*;
 //systems
 mod setup;
 pub use setup::setup;
 
 mod input;
 pub use input::input_system;
-
 
 #[derive(Bundle, Default)]
 pub struct Editor {

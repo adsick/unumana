@@ -1,7 +1,7 @@
+pub mod controller_mode;
+pub use controller_mode::ControllerMode;
+
 use bevy::{prelude::Component, utils::HashMap};
-
-use super::ControllerMode;
-
 //#[derive(Bundle)]
 #[derive(Default, Component)]
 pub struct Controller {
@@ -14,10 +14,9 @@ pub struct Controller {
 
 impl Controller {
     pub fn press(&mut self, sc: u32, time: f64) -> ((u32, f64), (u32, f64)) {
-        
         let last_released = self.last_released;
         let last_pressed = self.last_pressed;
-        if !self.is_pressed(sc){
+        if !self.is_pressed(sc) {
             self.released.remove(&sc);
             self.pressed.insert(sc, time);
             self.last_pressed = (sc, time);
@@ -54,14 +53,11 @@ impl Controller {
         return false;
     }
 
-
-
     // this is a bit cursed since it is defined in Controller and we don't have
     // acces to the keymap to show human readable key code, so it uses old fixed_keymap
     pub fn print_dbg(&self) {
         use crate::fixed_keymap::Convert;
         print!("pressed: ");
-
 
         let pressed = self
             .pressed

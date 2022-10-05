@@ -60,7 +60,10 @@ fn backend_update(
     }
 }
 
-fn frontend_update(mut frontend: Query<&mut Text, With<Content>>, backend: Query<&Backend, Changed<Backend>>) {
+fn frontend_update(
+    mut frontend: Query<&mut Text, With<Content>>,
+    backend: Query<&Backend, Changed<Backend>>,
+) {
     if backend.is_empty() {
         return;
     }
@@ -68,46 +71,46 @@ fn frontend_update(mut frontend: Query<&mut Text, With<Content>>, backend: Query
     frontend.single_mut().sections.first_mut().unwrap().value = backend.render();
 }
 
-fn debug_system(
-    controller: Query<&Controller, Changed<Controller>>,
-) {
+fn debug_system(controller: Query<&Controller, Changed<Controller>>) {
     if let Ok(controller) = controller.get_single() {
         controller.print_dbg();
     }
 }
 
 #[cfg(debug_assertions)]
-fn status_line_system(mut status_line: Query<&mut Text, With<StatusLine>>,
+fn status_line_system(
+    mut status_line: Query<&mut Text, With<StatusLine>>,
     time: Res<Time>,
     controller: Query<&Controller>,
     backend: Query<&Backend>,
-    keymap: Res<KeymapList>,) {
-        if let Ok(controller) = controller.get_single(){
-            status_line.single_mut().sections[0].value =
-            format!(
-                "{} mode: {:?}, keymap: {}, DBG, time: {:.3}\n",
-                backend.single().position(),
-                controller.mode,
-                keymap.name(),
-                time.seconds_since_startup()
-            );
-        }
+    keymap: Res<KeymapList>,
+) {
+    if let Ok(controller) = controller.get_single() {
+        status_line.single_mut().sections[0].value = format!(
+            "{} mode: {:?}, keymap: {}, DBG, time: {:.3}\n",
+            backend.single().position(),
+            controller.mode,
+            keymap.name(),
+            time.seconds_since_startup()
+        );
+    }
 }
 
 #[cfg(not(debug_assertions))]
-fn status_line_system(mut status_line: Query<&mut Text, With<StatusLine>>,
+fn status_line_system(
+    mut status_line: Query<&mut Text, With<StatusLine>>,
     time: Res<Time>,
     controller: Query<&Controller>,
     backend: Query<&Backend>,
-    keymap: Res<KeymapList>,) {
-        if let Ok(controller) = controller.get_single(){
-            status_line.single_mut().sections[0].value =
-            format!(
-                "{} mode: {:?}, keymap: {}, time: {:.3}\n",
-                backend.single().position(),
-                controller.mode,
-                keymap.name(),
-                time.seconds_since_startup()
-            );
-        }
+    keymap: Res<KeymapList>,
+) {
+    if let Ok(controller) = controller.get_single() {
+        status_line.single_mut().sections[0].value = format!(
+            "{} mode: {:?}, keymap: {}, time: {:.3}\n",
+            backend.single().position(),
+            controller.mode,
+            keymap.name(),
+            time.seconds_since_startup()
+        );
+    }
 }

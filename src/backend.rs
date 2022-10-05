@@ -1,10 +1,10 @@
 use bevy::prelude::Component;
 
-pub mod command;
 pub mod buffer;
+pub mod command;
 
+pub use buffer::{Line, TextBuffer};
 pub use command::Command;
-pub use buffer::{TextBuffer, Line};
 pub struct CurrentLine(usize);
 
 #[derive(Component)]
@@ -187,7 +187,7 @@ fn prev(str: &str, cur_ind: &mut usize) {
     // if let Some((ind, _)) = str.get(..*cur_ind).unwrap().char_indices().rev().next() {
     //     *cur_ind = ind;
     // }
-    if let Some(Some((ind, _))) = str.get(..*cur_ind).map(|s|s.char_indices().rev().next()) {
+    if let Some(Some((ind, _))) = str.get(..*cur_ind).map(|s| s.char_indices().rev().next()) {
         *cur_ind = ind;
     }
 }

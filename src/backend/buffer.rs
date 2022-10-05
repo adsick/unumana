@@ -12,7 +12,7 @@ impl TextBuffer {
         self.lines.len()
     }
 
-    pub fn lines(&self) -> impl Iterator<Item = &Line>{
+    pub fn lines(&self) -> impl Iterator<Item = &Line> {
         self.lines.iter()
     }
 
@@ -24,7 +24,7 @@ impl TextBuffer {
     }
 
     /// allocate a new line at the specified index
-    pub fn new_line(&mut self, index: usize){
+    pub fn new_line(&mut self, index: usize) {
         self.lines.insert(index, Line::new())
     }
 
@@ -40,7 +40,7 @@ impl Line {
     }
 }
 
-impl From<String> for Line{
+impl From<String> for Line {
     fn from(content: String) -> Self {
         Self(content, 0)
     }

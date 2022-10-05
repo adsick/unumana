@@ -17,24 +17,24 @@ pub struct KeymapList {
 
 impl KeymapList {
     pub fn next(&mut self) {
-        if self.current == self.keymaps.len() - 1{
+        if self.current == self.keymaps.len() - 1 {
             self.current = 0
         } else {
-            self.current+=1;
+            self.current += 1;
         }
     }
     pub fn prev(&mut self) {
-        if self.current == 0{
+        if self.current == 0 {
             self.current = self.keymaps.len() - 1;
         } else {
-            self.current-=1;
+            self.current -= 1;
         }
     }
 
     pub fn name(&self) -> &str {
         &self.get_current().name
     }
-    
+
     pub fn new() -> Self {
         KeymapList {
             keymaps: vec![Keymap::dvorak(), Keymap::russian()],

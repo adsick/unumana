@@ -25,12 +25,12 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(Scrollable)
         .insert(Content);
 
-        // commands.spawn(UiCameraBundle::default());
+    // commands.spawn(UiCameraBundle::default());
 
     commands
         .spawn(TextBundle {
             text: Text::from_section("".to_string(), regular.clone()),
-            
+
             ..default()
         })
         .insert(StatusLine);
@@ -48,19 +48,21 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let draw_mode = DrawMode::Fill(FillMode::color(Color::CRIMSON));
     let transform = Transform::from_translation(Vec3::new(200.0, 0.0, 0.0));
-    commands.spawn(geometry.build(draw_mode, transform)).insert(Scrollable).with_children(|parent|
-    {
-        let circle = shapes::Circle{
-            radius: 20.0,
-            center: Vec2::new(50.0, -30.0),
-        };
-    
-        let geometry = GeometryBuilder::new().add(&circle);
-    
-        let draw_mode = DrawMode::Fill(FillMode::color(Color::SEA_GREEN));
-        let transform = Transform::from_translation(Vec3::new(0.0, 0.0, 0.0));
-        parent.spawn(geometry.build(draw_mode, transform));
-    });
+    commands
+        .spawn(geometry.build(draw_mode, transform))
+        .insert(Scrollable)
+        .with_children(|parent| {
+            let circle = shapes::Circle {
+                radius: 20.0,
+                center: Vec2::new(50.0, -30.0),
+            };
+
+            let geometry = GeometryBuilder::new().add(&circle);
+
+            let draw_mode = DrawMode::Fill(FillMode::color(Color::SEA_GREEN));
+            let transform = Transform::from_translation(Vec3::new(0.0, 0.0, 0.0));
+            parent.spawn(geometry.build(draw_mode, transform));
+        });
 
     let shape = shapes::RegularPolygon {
         sides: 6,
@@ -79,5 +81,4 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         tr,
     ));
-
 }
